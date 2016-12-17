@@ -10,6 +10,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.greendaoexample.database.DaoSession;
+import com.greendaoexample.database.MyObject;
+import com.greendaoexample.database.MyObjectDao;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -67,4 +71,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
