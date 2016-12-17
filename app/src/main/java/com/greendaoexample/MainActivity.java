@@ -10,9 +10,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import org.greenrobot.greendao.query.Query;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Query<MyObject> myObjectsQuery;
+    private TextAdapter adapter;
+    List<MyObject> list = new ArrayList<>();
+    MyObjectDao myObjectDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        final TextAdapter adapter = new TextAdapter(createItems());
+        adapter = new TextAdapter();
         recyclerView.setAdapter(adapter);
+
+        saveToDb();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -32,19 +42,35 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
-                adapter.add();
+                add();
 
             }
         });
     }
 
-    private ArrayList<Integer> createItems() {
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(2);
-        list.add(3);
-        return list;
+    public void add() {
+        MyObject myObject = new MyObject(list.size() + 1L, Integer.toString(list.size() + 1));
+        list.add(myObject);
+        adapter.notifyDataSetChanged();
+        myObjectDao.insert(myObject);
+        updateItems();
     }
+
+    public void saveToDb() {
+        // get the note DAO
+        DaoSession daoSession = ((App) getApplicationContext()).getDaoSession();
+        myObjectDao = daoSession.getMyObjectDao();
+        // query all notes, sorted a-z by their text
+        myObjectsQuery = myObjectDao.queryBuilder().build();
+        updateItems();
+    }
+
+    private void updateItems() {
+        List<MyObject> notes = myObjectsQuery.list();
+        list = notes;
+        adapter.setNumbers(notes);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,10 +94,4 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void saveToDb(MyObject myObject) {
-        DaoSession daoSession = ((App) getApplication()).getDaoSession();
-        MyObjectDao myObjectDao = daoSession.getMyObjectDao();
-        myObjectDao.insert(myObject);
-
-    }
 }

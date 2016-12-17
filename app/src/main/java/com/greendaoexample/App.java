@@ -1,6 +1,7 @@
 package com.greendaoexample;
 
 import android.app.Application;
+import android.database.sqlite.SQLiteDatabase;
 
 /**
  * Created by Gurpreet on 12/17/2016.
@@ -12,14 +13,23 @@ public class App extends Application{
     public static final boolean ENCRYPTED = true;
 
     private DaoSession daoSession;
+    private static App mInstance;
 
     @Override
     public void onCreate() {
         super.onCreate();
-/*
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, ENCRYPTED ? "notes-db-encrypted" : "notes-db");
-        Database db = ENCRYPTED ? helper.getEncryptedWritableDb("super-secret") : helper.getWritableDb();
-        daoSession = new DaoMaster(db).newSession();*/
+
+        mInstance = this;
+
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "test-db");
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        daoSession = daoMaster.newSession();
+    }
+
+
+    public static App getmInstance() {
+        return mInstance;
     }
 
     public DaoSession getDaoSession() {
